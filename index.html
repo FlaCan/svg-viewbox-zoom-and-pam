@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="A widget to zoom and pam an SVG by manipulating its viewbox with JavaScript.">
+        <title>SVG Viewbox Zoom and Pan</title>
+        <style>
+            body {
+                font-family: 'Courier New', Courier, monospace;
+                margin: 0;
+                height: 200vh;
+            }
+            label {
+                display: block;
+                margin: 1em 0 1em 0;
+            }
+            #wrap {
+                /* the svg wrapper cna have any size */
+                width: 450px;
+                height: 450px;
+                margin: 50px auto 110px auto;
+            }
+            svg {
+                cursor: default;
+                background-color: aliceblue;
+            }
+            circle {
+                cursor: pointer;
+            }
+        </style>
+        <script>
+             
+            // scale = Math.min(Math.max(.125, scale), 4)
+
+            window.addEventListener("load", () => {
+
+                const svg = document.querySelector("svg")
+                const rangeX = document.querySelector("#range-x")
+                const rangeY = document.querySelector("#range-y")
+
+                let svg_x = parseInt(svg.getBoundingClientRect().x)
+                let svg_y = parseInt(svg.getBoundingClientRect().y)
+                let svg_w = parseInt(svg.getBoundingClientRect().width)
+                let svg_h = parseInt(svg.getBoundingClientRect().height)
+
+                const [x, y, w, h] = svg.attributes.viewBox.nodeValue.split(" ")
+                vb_x = parseInt(x)
+                vb_y = parseInt(y)
+                vb_w = parseInt(w)
+                vb_h = parseInt(h)
+
+                const scale = 1.25 // It can be any number more than 1 
+                const scale_up = Math.abs(scale - 1)
+                const scale_dw  = Math.abs(1 / scale - 1)
+                console.log(scale)
+                console.log(scale_up)
+                console.log(scale_dw)
+
+                svg.addEventListener('wheel', (ev) => {
+                    
+                    ev.preventDefault()
+
+                    /*** Get svg coordinates and convet them to integers ***/
+                    svg_x = parseInt(svg.getBoundingClientRect().x)
+                    svg_y = parseInt(svg.getBoundingClientRect().y)
+                    svg_w = parseInt(svg.getBoundingClientRect().width)
+                    svg_h = parseInt(svg.getBoundingClientRect().height)
+
+                    /*** Get viewBox coordinates and convet them to integers ***/
+                    const [x, y, w, h] = svg.attributes.viewBox.nodeValue.split(" ")
+                    vb_x = parseInt(x)
+                    vb_y = parseInt(y)
+                    vb_w = parseInt(w)
+                    vb_h = parseInt(h)
+
+                    const svg_ev_x = ev.x - svg_x
+                    const svg_ev_y = ev.y - svg_y
+                    const ratio_w = (vb_w / svg_w)
+                    const ratio_h = (vb_h / svg_h)
+                    const ev_norm_x = svg_ev_x * ratio_w
+                    const ev_norm_y = svg_ev_y * ratio_h
+                                    
+                    if (ev.deltaY < 0) {
+                        // zoom in // scale viewbox down
+                        vb_w = vb_w / scale 
+                        vb_h = vb_h / scale
+                        vb_x = vb_x + ev_norm_x * scale_dw  
+                        vb_y = vb_y + ev_norm_y * scale_dw
+                    } else {
+                        // zoom out // scale viewbox up 
+                        vb_w = vb_w * scale
+                        vb_h = vb_h * scale
+                        vb_x = vb_x - ev_norm_x * scale_up
+                        vb_y = vb_y - ev_norm_y * scale_up
+                    }
+
+                    svg.attributes.viewBox.nodeValue = `${vb_x} ${vb_y} ${vb_w} ${vb_h}`
+
+                }, false)
+                
+
+                rangeX.addEventListener("input", (ev) => {
+                    let [vb_x, vb_y, vb_w, vb_h] = svg.attributes.viewBox.nodeValue.split(" ")
+                    vb_x = rangeX.value 
+                    svg.attributes.viewBox.nodeValue = `${vb_x} ${vb_y} ${vb_w} ${vb_w}`
+                    console.log(`vbx: x ${vb_x} | y ${vb_y} | w  ${vb_w} | h ${vb_h}`)
+                }) 
+
+                rangeY.addEventListener("input", (ev) => {
+                    let [vb_x, vb_y, vb_w, vb_h] = svg.attributes.viewBox.nodeValue.split(" ")
+                    vb_y = rangeY.value 
+                    svg.attributes.viewBox.nodeValue = `${vb_x} ${vb_y} ${vb_w} ${vb_w}`
+                    console.log(`vbx: x ${vb_x} | y ${vb_y} | w  ${vb_w} | h ${vb_h}`)
+                }) 
+             
+               
+            })
+        </script>
+    </head>
+    <body>
+        <div id="wrap"> 
+            <!-- 
+                * svg is responsive its size depends on its wrap container; 
+                * the container can be placed wherever in the client
+                * viewbox coordinate can be changed arbitrarily
+            -->
+            <svg viewBox="0 0 1000 1000"> 
+
+                <g id="grid" fill="none" stroke="#ccc" stroke-width="1">
+                    <rect x="0" y="0" width="1000" height="1000" stroke="#000" stroke-width="2"/>
+                    <line x1="0" y1="250" x2="1000" y2="250" />
+                    <line x1="0" y1="500" x2="1000" y2="500" stroke="#c00"/>
+                    <line x1="0" y1="750" x2="1000" y2="750" />
+                    <line x1="250" y1="0" x2="250" y2="1000"/>
+                    <line x1="500" y1="0" x2="500" y2="1000" stroke="#c00"/>
+                    <line x1="750" y1="0" x2="750" y2="1000"/>
+                </g>
+
+                <circle fill="none" stroke="#000" stroke-width="1" cx="150" cy="150" r=".5" />
+                
+            </svg>
+        </div>
+
+        <form id="form-1">
+            <fieldset name="viewBox-controls">
+                <legend>Control the viewBox</legend>
+                <label for="range-x">min-x
+                    <input id="range-x" type="range" min="-1000" max="1000" value="0" step="1" name="range-x">
+                </label>
+                <label for="range-y">min-y
+                    <input id="range-y" type="range" min="-1000" max="1000" value="0" step="1" name="range-y">
+                </label>
+                
+            </fieldset>
+            <button id="submit-1" type="submit">Submit</button>
+            <button id="reset-1" type="reset">Reset</button>
+        </form>
+    </body>
+</html>

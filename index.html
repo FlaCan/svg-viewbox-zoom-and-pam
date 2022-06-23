@@ -35,31 +35,32 @@
 
             window.addEventListener("load", () => {
 
-                const svgs = document.querySelectorAll(".zoom-pan")
+                
                 const rangeX = document.querySelector("#range-x")
                 const rangeY = document.querySelector("#range-y")
 
-
-                const scale = 1.5 // It can be any number more than 1 
+                /*** Set an arbitrary zoom factor ( = scale value) ***/
+                const scale = 1.5 
                 const scale_up = Math.abs(scale - 1)
                 const scale_dw  = Math.abs(1 / scale - 1)
                 console.log(scale)
                 console.log(scale_up)
                 console.log(scale_dw)
-
+                
+                const svgs = document.querySelectorAll(".zoom-pan")
 
                 svgs.forEach(svg  => {
 
-                    // Get svg coord. and set their type to number
+                    /*** Get svg coord. and set their type to number ***/
                     let svg_x = parseFloat(svg.getBoundingClientRect().x)
                     let svg_y = parseFloat(svg.getBoundingClientRect().y)
                     let svg_w = parseFloat(svg.getBoundingClientRect().width)
                     let svg_h = parseFloat(svg.getBoundingClientRect().height)
 
-                    // Get viebox coord. 
+                    /*** Get viebox coord. ***/
                     const [x, y, w, h] = svg.attributes.viewBox.nodeValue.split(" ")
 
-                    // Set viebox coord. type to number
+                    /*** Set viebox coord. type to number ***/
                     vb_x = parseFloat(x)
                     vb_y = parseFloat(y)
                     vb_w = parseFloat(w)
@@ -67,6 +68,7 @@
 
                     svg.addEventListener('wheel', (ev) => {
                         
+                        /*** Prevent the browser normal behaviour in response to a wheel event ***/
                         ev.preventDefault()
 
                         /*** Get svg coordinates and convet them to integers ***/
@@ -84,6 +86,7 @@
 
                         console.log(`vbx: x ${vb_x} | y ${vb_y} | w  ${vb_w} | h ${vb_h}`)
 
+                        /*** Normailse the event coordinates to the viewbox "world" ***/
                         const svg_ev_x = ev.x - svg_x
                         const svg_ev_y = ev.y - svg_y
                         const ratio_w = (vb_w / svg_w)
@@ -92,19 +95,20 @@
                         const ev_norm_y = svg_ev_y * ratio_h                        
                                         
                         if (ev.deltaY < 0) {
-                            // zoom in // scale viewbox down
+                            /*** zoom in ***/
                             vb_w = vb_w / scale 
                             vb_h = vb_h / scale
                             vb_x = vb_x + ev_norm_x * scale_dw  
                             vb_y = vb_y + ev_norm_y * scale_dw
                         } else {
-                            // zoom out // scale viewbox up 
+                            /*** zoom out ***/ 
                             vb_w = vb_w * scale
                             vb_h = vb_h * scale
                             vb_x = vb_x - ev_norm_x * scale_up
                             vb_y = vb_y - ev_norm_y * scale_up
                         }
 
+                        /*** Set viewbox coordinates to the updated values ***/
                         svg.attributes.viewBox.nodeValue = `${vb_x} ${vb_y} ${vb_w} ${vb_h}`
 
                     }, false)
@@ -113,14 +117,12 @@
                         let [vb_x, vb_y, vb_w, vb_h] = svg.attributes.viewBox.nodeValue.split(" ")
                         vb_x = rangeX.value 
                         svg.attributes.viewBox.nodeValue = `${vb_x} ${vb_y} ${vb_w} ${vb_w}`
-                        // console.log(`vbx: x ${vb_x} | y ${vb_y} | w  ${vb_w} | h ${vb_h}`)
                     }) 
 
                     rangeY.addEventListener("input", (ev) => {
                         let [vb_x, vb_y, vb_w, vb_h] = svg.attributes.viewBox.nodeValue.split(" ")
                         vb_y = rangeY.value 
                         svg.attributes.viewBox.nodeValue = `${vb_x} ${vb_y} ${vb_w} ${vb_w}`
-                        // console.log(`vbx: x ${vb_x} | y ${vb_y} | w  ${vb_w} | h ${vb_h}`)
                     }) 
                 
                 })

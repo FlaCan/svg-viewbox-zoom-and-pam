@@ -16,9 +16,10 @@
             }
             .wrap {
                 /* the svg wrapper can have any size */
-                width: 450px;
-                height: 450px;
+                width: 300px;
+                height: 300px;
                 margin: 50px auto 110px auto;
+                overflow: hidden;
             }
             svg {
                 cursor: default;
@@ -34,12 +35,12 @@
 
             window.addEventListener("load", () => {
 
-                const svg = document.querySelectorAll(".zoom-and-pan")
+                const svgs = document.querySelectorAll(".zoom-pan")
                 const rangeX = document.querySelector("#range-x")
                 const rangeY = document.querySelector("#range-y")
 
 
-                const scale = 1.25 // It can be any number more than 1 
+                const scale = 1.5 // It can be any number more than 1 
                 const scale_up = Math.abs(scale - 1)
                 const scale_dw  = Math.abs(1 / scale - 1)
                 console.log(scale)
@@ -47,42 +48,48 @@
                 console.log(scale_dw)
 
 
-                svg.forEach(svg  => {
+                svgs.forEach(svg  => {
 
-                    let svg_x = parseInt(svg.getBoundingClientRect().x)
-                    let svg_y = parseInt(svg.getBoundingClientRect().y)
-                    let svg_w = parseInt(svg.getBoundingClientRect().width)
-                    let svg_h = parseInt(svg.getBoundingClientRect().height)
+                    // Get svg coord. and set their type to number
+                    let svg_x = parseFloat(svg.getBoundingClientRect().x)
+                    let svg_y = parseFloat(svg.getBoundingClientRect().y)
+                    let svg_w = parseFloat(svg.getBoundingClientRect().width)
+                    let svg_h = parseFloat(svg.getBoundingClientRect().height)
 
+                    // Get viebox coord. 
                     const [x, y, w, h] = svg.attributes.viewBox.nodeValue.split(" ")
-                    vb_x = parseInt(x)
-                    vb_y = parseInt(y)
-                    vb_w = parseInt(w)
-                    vb_h = parseInt(h)
+
+                    // Set viebox coord. type to number
+                    vb_x = parseFloat(x)
+                    vb_y = parseFloat(y)
+                    vb_w = parseFloat(w)
+                    vb_h = parseFloat(h)
 
                     svg.addEventListener('wheel', (ev) => {
                         
                         ev.preventDefault()
 
                         /*** Get svg coordinates and convet them to integers ***/
-                        svg_x = parseInt(svg.getBoundingClientRect().x)
-                        svg_y = parseInt(svg.getBoundingClientRect().y)
-                        svg_w = parseInt(svg.getBoundingClientRect().width)
-                        svg_h = parseInt(svg.getBoundingClientRect().height)
+                        svg_x = parseFloat(svg.getBoundingClientRect().x)
+                        svg_y = parseFloat(svg.getBoundingClientRect().y)
+                        svg_w = parseFloat(svg.getBoundingClientRect().width)
+                        svg_h = parseFloat(svg.getBoundingClientRect().height)
 
                         /*** Get viewBox coordinates and convet them to integers ***/
                         const [x, y, w, h] = svg.attributes.viewBox.nodeValue.split(" ")
-                        vb_x = parseInt(x)
-                        vb_y = parseInt(y)
-                        vb_w = parseInt(w)
-                        vb_h = parseInt(h)
+                        vb_x = parseFloat(x)
+                        vb_y = parseFloat(y)
+                        vb_w = parseFloat(w)
+                        vb_h = parseFloat(h)
+
+                        console.log(`vbx: x ${vb_x} | y ${vb_y} | w  ${vb_w} | h ${vb_h}`)
 
                         const svg_ev_x = ev.x - svg_x
                         const svg_ev_y = ev.y - svg_y
                         const ratio_w = (vb_w / svg_w)
                         const ratio_h = (vb_h / svg_h)
                         const ev_norm_x = svg_ev_x * ratio_w
-                        const ev_norm_y = svg_ev_y * ratio_h
+                        const ev_norm_y = svg_ev_y * ratio_h                        
                                         
                         if (ev.deltaY < 0) {
                             // zoom in // scale viewbox down
@@ -99,8 +106,6 @@
                         }
 
                         svg.attributes.viewBox.nodeValue = `${vb_x} ${vb_y} ${vb_w} ${vb_h}`
-
-                        console.log(`vbx: x ${vb_x} | y ${vb_y} | w  ${vb_w} | h ${vb_h}`)
 
                     }, false)
                 
@@ -129,7 +134,7 @@
                 * the container can be placed wherever in the client
                 * viewbox coordinate can be changed arbitrarily
             -->
-            <svg class="zoom-and-pan" viewBox="0 0 1000 1000"> 
+            <svg class="zoom-pan" viewBox="0 0 1000 1000"> 
 
                 <g id="grid" fill="none" stroke="#ccc" stroke-width="1">
                     <rect x="0" y="0" width="1000" height="1000" stroke="#000" stroke-width="2"/>
@@ -147,7 +152,7 @@
         </div>
 
         <div class="wrap"> 
-            <svg class="zoom-and-pan" viewBox="0 0 1000 1000"> 
+            <svg class="zoom-pan" viewBox="0 0 1000 1000"> 
 
                 <g id="grid" fill="none" stroke="#ccc" stroke-width="1">
                     <rect x="0" y="0" width="1000" height="1000" stroke="#000" stroke-width="2"/>
@@ -165,7 +170,7 @@
         </div>
 
         <div class="wrap"> 
-            <svg class="zoom-and-pan" viewBox="0 0 1000 1000"> 
+            <svg class="zoom-pan" viewBox="0 0 1000 1000"> 
 
                 <g id="grid" fill="none" stroke="#ccc" stroke-width="1">
                     <rect x="0" y="0" width="1000" height="1000" stroke="#000" stroke-width="2"/>
